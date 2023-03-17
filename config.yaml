@@ -38,8 +38,7 @@ seats:
   spacing_priority: ["[F-L]*"]
   max_spacing: 1
 
-input_file:
-  name: "students.csv"
-  sep: " "
-  pk: "PID"
+students:
+  file: "students.csv"
+  delimiter: "\t"
   dext: "Orientation" #L = left, R = Right, A = Ambi
