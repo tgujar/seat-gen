@@ -2,45 +2,31 @@ import yaml
 import re
 import csv
 import random
+from natsort import natsorted
 
 
-class Seats:
+class SeatLoader:
     def __init__(self, file):
-        self.file = file
-        self.seats = self.load_seats()
-        self.spacing_priority = self.get_spacing_priority()
-
-    def load_seats(self):
-        seats = []
-        with open(self.file) as f:
+        with open(file) as f:
             seat_data = yaml.load(f, yaml.CLoader)['seats']
-            left_handed_regex = map(
-                lambda reg: re.compile(reg),
-                seat_data['left_handed']
-            )
-
+            self.spacing_priority = seat_data['spacing_priority']
+            self.filter_unallocated = seat_data['filter_unallocated']
+            self.output_file = seat_data['output_file']
+            self.seats = []
             for id, srange in seat_data['name'].items():
                 for num in range(srange[0], srange[1] + 1):
                     seat_name = id + str(num)
-                    seats.append({
+                    self.seats.append({
                         "name": seat_name,
-                        "dex": "L" if any([h.match(seat_name) for h in left_handed_regex]) else "R",
-                        "unallocated": True,
+                        "dex": "L" if any([re.fullmatch(h, seat_name) != None for h in seat_data['left_handed']]) else "R",
+                        "allocated": False,
                     })
-        return seats
-
-    def get_spacing_priority(self):
-        with open(self.file) as f:
-            seat_data = yaml.load(f, yaml.CLoader)['seats']
-            r = list(map(lambda reg: re.compile(reg),
-                     seat_data['spacing_priority']))
-            return r
 
     def assign_seats(self, EnrolledStudents):
         max_empty = len(self.seats) - len(EnrolledStudents.students)
         self.seats.sort(key=lambda seat: next(
             (i for (i, h) in enumerate(self.spacing_priority)
-             if h.fullmatch(seat["name"]) != None),
+             if re.fullmatch(h, seat["name"]) != None),
             len(self.spacing_priority)
         ))
         left, right, ambi = [], [], []
@@ -65,37 +51,40 @@ class Seats:
             pick = next((l for l in order if len(l) > 0), None)
             if pick == None:
                 break
-            self.seats[i]["student"] = pick.pop()
-            self.seats[i]["unallocated"] = False
+            self.seats[i].update({
+                k: v for k, v in pick.pop().items() if k not in EnrolledStudents.filter_fields
+            })
+            self.seats[i]["allocated"] = True
+        self.seats = natsorted(self.seats, key=lambda seat: seat["name"])
+
+    def output_seats(self):
+        keys = self.seats[0].keys()
+        if self.filter_unallocated:
+            keys = [key for key in self.seats[0].keys() if key != "allocated"]
+        with open(self.output_file, "w") as f:
+            writer = csv.DictWriter(f, fieldnames=keys, extrasaction='ignore')
+            writer.writeheader()
+            if self.filter_unallocated:
+                writer.writerows(
+                    filter(lambda seat: seat["allocated"], self.seats))
+                return
+            writer.writerows(self.seats)
 
 
-class Students:
+class StudentLoader:
     def __init__(self, config):
-        self.config = config
-        self.students = self.load_students()
-        self.dexCol = self.get_dex_col()
-        random.shuffle(self.students)
-
-    def load_students(self):
-        with open(self.config) as f:
+        with open(config) as f:
             student_data = yaml.load(f, yaml.CLoader)['students']
+            self.dexCol = student_data["dex"]
+            self.filter_fields = student_data["filter_fields"]
             with open(student_data["file"]) as p:
-                return list(csv.DictReader(p, delimiter=student_data["delimiter"]))
-
-    def get_dex_col(self):
-        with open(self.config) as f:
-            student_data = yaml.load(f, yaml.CLoader)['students']
-            return student_data["dex"]
+                self.students = list(csv.DictReader(
+                    p, delimiter=student_data["delimiter"]))
+        random.shuffle(self.students)
 
 
 if __name__ == "__main__":
-    seats = Seats("config.yaml")
-    students = Students("config.yaml")
+    seats = SeatLoader("config.yaml")
+    students = StudentLoader("config.yaml")
     seats.assign_seats(students)
-    # h = re.compile('[F-L].*')
-    # print(seats.spacing_priority[0].fullmatch("F1"))
-    # print(next(
-    #     (i for (i, h) in enumerate(seats.spacing_priority)
-    #      if h.fullmatch("F1") != None),
-    #     len(seats.spacing_priority)
-    # ))
+    seats.output_seats()

@@ -33,9 +33,11 @@ seats:
       "^R17",
     ]
   spacing_priority: ["[F-L].*"]
+  filter_unallocated: false
+  output_file: "output.csv"
 
 students:
   file: "students.csv"
   delimiter: "\t"
   dex: "Orientation" #L = left, R = Right, A = Ambi
-  output_file: "output.csv"
+  filter_fields: [] #fields to be filtered out, fields in the list are not in output
