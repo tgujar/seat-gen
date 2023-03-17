@@ -8,37 +8,34 @@ seats:
     F: [1, 28]
     G: [1, 28]
     H: [1, 28]
-    I: [1, 28]
     J: [1, 28]
     K: [1, 28]
     L: [1, 28]
     M: [1, 28]
     N: [1, 28]
-    O: [1, 28]
     P: [1, 28]
-    Q: [1, 28]
     R: [1, 20]
   left_handed:
     [
-      "R6",
-      "[D-P]7",
-      "[B-C]6",
-      "A4",
-      "A17",
-      "B25",
-      "C26",
-      "D27",
-      "[E-P]28",
-      "R20",
-      "A12",
-      "[B-C]20",
-      "[D-P]21",
-      "R17",
+      "^R6",
+      "^[D-P]7",
+      "^[B-C]6",
+      "^A4",
+      "^A17",
+      "^B25",
+      "^C26",
+      "^D27",
+      "^[E-P]28",
+      "^R20",
+      "^A12",
+      "^[B-C]20",
+      "^[D-P]21",
+      "^R17",
     ]
-  spacing_priority: ["[F-L]*"]
-  max_spacing: 1
+  spacing_priority: ["[F-L].*"]
 
 students:
   file: "students.csv"
   delimiter: "\t"
-  dext: "Orientation" #L = left, R = Right, A = Ambi
+  dex: "Orientation" #L = left, R = Right, A = Ambi
+  output_file: "output.csv"
