@@ -11,13 +11,14 @@ class SeatLoader:
             seat_data = yaml.load(f, yaml.CLoader)['seats']
             self.spacing_priority = seat_data['spacing_priority']
             self.filter_unallocated = seat_data['filter_unallocated']
+            self.filter_seat_dex = seat_data['filter_seat_dex']
             self.output_file = seat_data['output_file']
             self.seats = []
             for id, srange in seat_data['name'].items():
                 for num in range(srange[0], srange[1] + 1):
                     seat_name = id + str(num)
                     self.seats.append({
-                        "name": seat_name,
+                        "seat_name": seat_name,
                         "dex": "L" if any([re.fullmatch(h, seat_name) != None for h in seat_data['left_handed']]) else "R",
                         "allocated": False,
                     })
@@ -30,7 +31,7 @@ class SeatLoader:
         # Sort seats by spacing priority, higher priority seats are assigned spacing first
         self.seats.sort(key=lambda seat: next(
             (i for (i, h) in enumerate(self.spacing_priority)
-             if re.fullmatch(h, seat["name"]) != None),
+             if re.fullmatch(h, seat["seat_name"]) != None),
             len(self.spacing_priority)
         ))
         left, right, ambi = [], [], []
@@ -65,11 +66,11 @@ class SeatLoader:
             self.seats[i]["allocated"] = True  # mark seat as allocated
 
     def output_seats(self):
-        self.seats = natsorted(self.seats, key=lambda seat: seat["name"])
+        self.seats = natsorted(self.seats, key=lambda seat: seat["seat_name"])
+        filter_keys = [] + (["allocated"] if self.filter_unallocated else []) + \
+            (["dex"] if self.filter_seat_dex else [])
 
-        keys = self.seats[0].keys()
-        if self.filter_unallocated:
-            keys = [key for key in self.seats[0].keys() if key != "allocated"]
+        keys = [key for key in self.seats[0].keys() if key not in filter_keys]
 
         with open(self.output_file, "w") as f:
             writer = csv.DictWriter(f, fieldnames=keys, extrasaction='ignore')
