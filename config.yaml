@@ -1,6 +1,6 @@
 seats:
   name:
-    A: [1, 17]
+    A: [1, 17] # Seat set name, range of seats (e.g A1..A17)
     B: [1, 25]
     C: [1, 26]
     D: [1, 27]
@@ -15,7 +15,7 @@ seats:
     N: [1, 28]
     P: [1, 28]
     R: [1, 20]
-  left_handed:
+  left_handed: # determines regex for seats which are left-handed
     [
       "^R6",
       "^[D-P]7",
@@ -31,13 +31,13 @@ seats:
       "^[B-C]20",
       "^[D-P]21",
       "^R17",
-    ]
-  spacing_priority: ["[F-L].*"]
-  filter_unallocated: false
-  output_file: "output.csv"
+    ] # regex matching for left handed seats
+  spacing_priority: ["[F-L].*"] # priority of seat spacing, earlier in list is higher priority
+  filter_unallocated: true # filter out unallocated seats
+  output_file: "output.csv" # output seating
 
 students:
   file: "students.csv"
   delimiter: "\t"
-  dex: "Orientation" #L = left, R = Right, A = Ambi
+  dex: "Dexterity" #L = left, R = Right, A = Ambi, this column in "file" which specifies dexterity, can be empty
   filter_fields: [] #fields to be filtered out, fields in the list are not in output
