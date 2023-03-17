@@ -1,11 +1,11 @@
 seats:
   name:
     A: [1, 17] # Seat set name, range of seats (e.g A1..A17)
-    B: [1, 25]
+    B: [1, 25] 
     C: [1, 26]
     D: [1, 27]
-    E: [1, 28]
-    F: [1, 28]
+    E: [1, 28] # ↑ closer to front of room
+    F: [1, 28] # ↓ closer to back of room
     G: [1, 28]
     H: [1, 28]
     J: [1, 28]
