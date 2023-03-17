@@ -15,26 +15,19 @@ seats:
     N: [1, 28]
     P: [1, 28]
     R: [1, 20]
-  left_handed: # determines regex for seats which are left-handed
-    [
-      "^R6",
+  left_handed: [
+      "^R3",
       "^[D-P]7",
       "^[B-C]6",
       "^A4",
-      "^A17",
-      "^B25",
-      "^C26",
-      "^D27",
-      "^[E-P]28",
-      "^R20",
       "^A12",
       "^[B-C]20",
       "^[D-P]21",
       "^R17",
     ] # regex matching for left handed seats
   spacing_priority: ["[F-L].*"] # priority of seat spacing, earlier in list is higher priority
-  filter_unallocated: true # filter out unallocated seats
-  filter_seat_dex: true # filter out column which shows if seat is left or right handed
+  filter_unallocated: false # filter out unallocated seats
+  filter_seat_dex: false # filter out column which shows if seat is left or right handed
   output_file: "output.csv" # output seating
 
 students:

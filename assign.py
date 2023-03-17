@@ -25,6 +25,7 @@ class SeatLoader:
 
     def assign_seats(self, EnrolledStudents):
         max_empty = len(self.seats) - len(EnrolledStudents.students)
+
         if max_empty < 0:
             raise Exception("Not enough seats for students")
 
@@ -39,20 +40,41 @@ class SeatLoader:
         for student in EnrolledStudents.students:
             if student.get(EnrolledStudents.dexCol, "R") == "L":
                 left.append(student)
-            elif student.get(EnrolledStudents.dexCol, "R") == "R":
-                right.append(student)
-            else:
+            elif student.get(EnrolledStudents.dexCol, "R") == "A":
                 ambi.append(student)
+            else:
+                right.append(student)
 
+        left_empty = 0
         for i in range(len(self.seats)):
-            if i % 2 != 0 and max_empty > 0 and self.seats[i]["dex"] != "L":
-                max_empty -= 1
+            if self.seats[i]["dex"] != "L":
+                continue
+            order = [left, ambi]  # prioritize left handed students
+            pick = next((l for l in order if len(l) > 0), None)
+
+            if pick is None:
+                left_empty += 1
+                continue
+            self.seats[i].update({
+                k: v for k, v in pick.pop().items() if k not in EnrolledStudents.filter_fields
+            })
+
+            self.seats[i]["allocated"] = True  # mark seat as allocated
+
+        right_empty = max_empty - left_empty
+        for i in range(len(self.seats)):
+            if self.seats[i]["allocated"]:
+                continue
+
+            if left_empty > 0 and self.seats[i]["dex"] == "L":
+                left_empty -= 1
+                continue
+
+            if i % 2 != 0 and right_empty > 0 and self.seats[i]["dex"] == "R":
+                right_empty -= 1
                 continue
 
             order = [right, ambi, left]
-            if self.seats[i]["dex"] == "L":
-                order = [left, ambi, right]  # prioritize left handed students
-
             pick = next((l for l in order if len(l) > 0), None)
 
             # if no students left, break
